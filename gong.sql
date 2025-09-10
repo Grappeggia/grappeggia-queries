@@ -77,7 +77,10 @@ SELECT
   ) AS transcript,
   g.primary_sfdc_account_id,
   g.primary_sfdc_opportunity_id,
-  co.contact_info
+  REGEXP_REPLACE(
+    REGEXP_REPLACE(TO_JSON(co.contact_info), '[\\r\\n\\t\\f\\v]+', ' '),
+    '\\s{2,}', ' '
+  ) AS contact_info
 FROM calls g
 LEFT JOIN contacts co
   ON co.gong_call_id = g.gong_call_id
