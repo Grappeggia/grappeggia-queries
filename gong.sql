@@ -1,4 +1,7 @@
-WITH calls AS (
+WITH params AS (
+  SELECT 30 AS days_back, CURRENT_TIMESTAMP() AS end_ts
+),
+calls AS (
   SELECT
     g.call_start_time,
     g.transcript,
@@ -6,9 +9,10 @@ WITH calls AS (
     g.primary_sfdc_account_id,
     g.primary_sfdc_opportunity_id
   FROM DWH_PROD.PRISM.GONG_TRANSCRIPTS AS g
+  JOIN params p ON TRUE
   WHERE NOT g.primary_sfdc_account_id IS NULL
-    AND g.call_start_time >= DATEADD(DAY, -10, CURRENT_TIMESTAMP())
-  QUALIFY ROW_NUMBER() OVER (ORDER BY g.call_start_time DESC) <= 200
+    AND g.call_start_time >= DATEADD(DAY, -p.days_back, p.end_ts)
+  QUALIFY ROW_NUMBER() OVER (ORDER BY g.call_start_time DESC) <= 20000
 ), contacts AS (
   SELECT
     g.gong_call_id,
@@ -67,7 +71,10 @@ SELECT
   co.account_name,
   g.gong_call_id,
   TO_CHAR(g.call_start_time, 'YYYY-MM-DD HH24:MI') AS call_start_time,
-  REGEXP_REPLACE(TO_JSON(ta.transcript), '\\n|\\r|\\\\n', ' ') AS transcript,
+  REGEXP_REPLACE(
+    REGEXP_REPLACE(TO_JSON(ta.transcript), '[\\r\\n\\t\\f\\v]+', ' '),
+    '\\s{2,}', ' '
+  ) AS transcript,
   g.primary_sfdc_account_id,
   g.primary_sfdc_opportunity_id,
   co.contact_info
