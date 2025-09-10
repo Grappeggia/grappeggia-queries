@@ -1,0 +1,12 @@
+# Ignore contents of data folders, keep the folders
+/input/*
+!/input/.gitkeep
+/output/*
+!/output/.gitkeep
+
+# macOS
+.DS_Store
+
+# Snow CLI outputs
+*.json
+*.csv
