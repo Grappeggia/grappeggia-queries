@@ -1,0 +1,4 @@
+When working with Snowflake:
+- Use the Snow CLI for all queries.
+- If a table's schema is unknown, retrieve it before modifying queries.
+- When modifying queries, run the original and the modified versions to verify the intended change.
